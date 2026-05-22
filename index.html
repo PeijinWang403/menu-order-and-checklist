@@ -1,0 +1,2074 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>家庭点菜助手</title>
+    <style>
+/* 基础样式重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #fff8f0 0%, #ffffff 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.app-container {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    background: #ffffff;
+    box-shadow: 0 0 30px rgba(255, 140, 0, 0.1);
+}
+
+/* 头部样式 */
+.header {
+    background: linear-gradient(135deg, #ff8c00 0%, #ff6b35 100%);
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+    border-radius: 0 0 30px 30px;
+    box-shadow: 0 4px 20px rgba(255, 140, 0, 0.3);
+}
+
+.header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.header p {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* 主内容区 */
+.main-content {
+    padding: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.section-title {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* 分类卡片网格 */
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.category-card {
+    background: white;
+    border-radius: 16px;
+    padding: 25px 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    border-color: #ff8c00;
+    box-shadow: 0 8px 25px rgba(255, 140, 0, 0.2);
+}
+
+.category-card:active {
+    transform: translateY(0);
+}
+
+.category-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+}
+
+.category-card h3 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.category-card p {
+    font-size: 12px;
+    color: #999;
+}
+
+/* 页面头部 */
+.page-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 15px;
+}
+
+.back-btn {
+    background: #fff5eb;
+    border: none;
+    color: #ff8c00;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.back-btn:hover {
+    background: #ff8c00;
+    color: white;
+}
+
+.page-title {
+    font-size: 20px;
+    color: #333;
+    font-weight: 600;
+}
+
+/* 菜品列表 */
+.dish-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dish-item {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.dish-item:hover {
+    box-shadow: 0 4px 15px rgba(255, 140, 0, 0.15);
+    border-color: #ffd4b3;
+}
+
+.dish-info h4 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.dish-info p {
+    font-size: 12px;
+    color: #999;
+}
+
+.add-btn {
+    background: linear-gradient(135deg, #ff8c00 0%, #ff6b35 100%);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(255, 140, 0, 0.4);
+}
+
+.add-btn:active {
+    transform: scale(0.95);
+}
+
+/* 购物车浮动按钮 */
+.cart-float {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #ff8c00 0%, #ff6b35 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(255, 140, 0, 0.4);
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.cart-float:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(255, 140, 0, 0.5);
+}
+
+.cart-icon {
+    font-size: 24px;
+}
+
+.cart-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4444;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+/* 购物车弹窗 */
+.cart-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 200;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.cart-modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.cart-content {
+    background: white;
+    width: 100%;
+    max-width: 480px;
+    max-height: 70vh;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.cart-header h3 {
+    font-size: 18px;
+    color: #333;
+    font-weight: 600;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: #f5f5f5;
+    color: #666;
+}
+
+.cart-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px 20px;
+    max-height: 40vh;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+.cart-item-info h4 {
+    font-size: 15px;
+    color: #333;
+    margin-bottom: 3px;
+    font-weight: 500;
+}
+
+.cart-item-info span {
+    font-size: 12px;
+    color: #ff8c00;
+    background: #fff5eb;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.remove-btn {
+    background: #fff0f0;
+    border: none;
+    color: #ff4444;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-btn:hover {
+    background: #ff4444;
+    color: white;
+}
+
+.empty-cart {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.empty-cart-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.cart-footer {
+    padding: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.confirm-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #ff8c00 0%, #ff6b35 100%);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.confirm-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 140, 0, 0.4);
+}
+
+.confirm-btn:active {
+    transform: translateY(0);
+}
+
+/* 原料清单页 */
+.ingredient-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.selected-dishes, .ingredient-list {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.selected-dishes h3, .ingredient-list h3 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.selected-dishes h3::before {
+    content: '🍽️';
+}
+
+.ingredient-list h3::before {
+    content: '🛒';
+}
+
+/* 按菜品分组的食材卡片 */
+.dish-ingredient-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dish-ingredient-card {
+    background: #fafafa;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.dish-ingredient-card:hover {
+    box-shadow: 0 3px 12px rgba(255, 140, 0, 0.1);
+    border-color: #ffd4b3;
+}
+
+.dish-ingredient-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: linear-gradient(135deg, #fff5eb 0%, #ffe8d6 100%);
+    border-bottom: 1px solid #ffd4b3;
+}
+
+.dish-ingredient-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+}
+
+.dish-ingredient-category {
+    font-size: 12px;
+    color: #ff8c00;
+    background: white;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.dish-ingredient-body {
+    padding: 10px 15px;
+}
+
+.dish-ingredient-body .ingredient-item {
+    padding: 6px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.dish-ingredient-body .ingredient-item:last-child {
+    border-bottom: none;
+}
+
+.dish-ingredient-body .ingredient-name {
+    font-size: 13px;
+    color: #555;
+}
+
+.dish-ingredient-body .ingredient-amount {
+    font-size: 13px;
+    color: #ff8c00;
+    font-weight: 500;
+}
+
+.selected-dish-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dish-tag {
+    background: linear-gradient(135deg, #fff5eb 0%, #ffe8d6 100%);
+    color: #ff8c00;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid #ffd4b3;
+}
+
+.ingredient-categories {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.ingredient-category {
+    background: #fafafa;
+    border-radius: 12px;
+    padding: 15px;
+}
+
+.ingredient-category h4 {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.ingredient-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ingredient-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed #e0e0e0;
+}
+
+.ingredient-item:last-child {
+    border-bottom: none;
+}
+
+.ingredient-name {
+    font-size: 14px;
+    color: #333;
+}
+
+.ingredient-amount {
+    font-size: 13px;
+    color: #ff8c00;
+    font-weight: 500;
+}
+
+/* 导出功能样式 */
+.export-header {
+    background: linear-gradient(135deg, #fff5eb 0%, #ffe8d6 100%);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    border: 1px solid #ffd4b3;
+}
+
+.export-date {
+    font-size: 14px;
+    color: #ff8c00;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.export-section {
+    margin-top: 20px;
+    padding: 0 20px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.export-btn {
+    background: linear-gradient(135deg, #ff8c00 0%, #ff6b35 100%);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
+}
+
+.export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 140, 0, 0.4);
+}
+
+.export-btn:active {
+    transform: translateY(0);
+}
+
+.export-icon {
+    font-size: 18px;
+}
+
+/* 导出图片时的样式优化 */
+.exporting {
+    background: white !important;
+    padding: 20px !important;
+    border-radius: 16px !important;
+}
+
+/* 响应式适配 */
+@media (max-width: 480px) {
+    .app-container {
+        max-width: 100%;
+    }
+
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .category-card {
+        padding: 20px 12px;
+    }
+
+    .cart-float {
+        bottom: 20px;
+        right: 20px;
+    }
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ffcc99;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #ff8c00;
+}
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1>🍽️ 家庭点菜助手</h1>
+            <p>轻松规划每日餐食</p>
+        </header>
+
+        <!-- 首页 - 分类选择 -->
+        <main class="main-content" id="homePage">
+            <h2 class="section-title">选择菜品分类</h2>
+            <div class="category-grid">
+                <div class="category-card" data-category="meat">
+                    <div class="category-icon">🥩</div>
+                    <h3>荤菜</h3>
+                    <p>肉类主菜</p>
+                </div>
+                <div class="category-card" data-category="vegetable">
+                    <div class="category-icon">🥬</div>
+                    <h3>素菜</h3>
+                    <p>蔬菜类菜品</p>
+                </div>
+                <div class="category-card" data-category="staple">
+                    <div class="category-icon">🍚</div>
+                    <h3>主食</h3>
+                    <p>米饭面食等</p>
+                </div>
+                <div class="category-card" data-category="soup">
+                    <div class="category-icon">🍲</div>
+                    <h3>汤羹</h3>
+                    <p>汤品炖品</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- 菜品列表页 -->
+        <main class="main-content hidden" id="menuPage">
+            <div class="page-header">
+                <button class="back-btn" id="backBtn">← 返回</button>
+                <h2 class="page-title" id="categoryTitle">荤菜</h2>
+            </div>
+            <div class="dish-list" id="dishList">
+                <!-- 动态生成菜品列表 -->
+            </div>
+        </main>
+
+        <!-- 购物车浮动按钮 -->
+        <div class="cart-float" id="cartFloat">
+            <div class="cart-icon">🛒</div>
+            <span class="cart-count" id="cartCount">0</span>
+        </div>
+
+        <!-- 购物车弹窗 -->
+        <div class="cart-modal hidden" id="cartModal">
+            <div class="cart-content">
+                <div class="cart-header">
+                    <h3>已选菜品</h3>
+                    <button class="close-btn" id="closeCart">×</button>
+                </div>
+                <div class="cart-list" id="cartList">
+                    <!-- 动态生成购物车列表 -->
+                </div>
+                <div class="cart-footer">
+                    <button class="confirm-btn" id="confirmBtn">确认生成采购清单</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 原料清单页 -->
+        <main class="main-content hidden" id="ingredientPage">
+            <div class="page-header">
+                <button class="back-btn" id="backHomeBtn">← 返回首页</button>
+                <h2 class="page-title">采购清单</h2>
+            </div>
+            <div class="ingredient-content" id="ingredientContent">
+                <div class="export-header">
+                    <div class="export-date">📅 生成日期：<span id="exportDate"></span></div>
+                </div>
+                <div class="selected-dishes" id="selectedDishes">
+                    <h3>已选菜品</h3>
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+            <div class="export-section">
+                <button class="export-btn" id="exportBtn">
+                    <span class="export-icon">📷</span>
+                    导出为图片
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+// 菜品数据
+const dishesData = {
+    meat: {
+        name: '荤菜',
+        items: [
+            {
+                id: 'm1',
+                name: '红烧肉',
+                desc: '肥而不腻，入口即化',
+                ingredients: {
+                    '肉类': [{ name: '五花肉', amount: '500g' }],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '老抽', amount: '1勺' },
+                        { name: '冰糖', amount: '30g' },
+                        { name: '料酒', amount: '2勺' },
+                        { name: '八角', amount: '2个' },
+                        { name: '桂皮', amount: '1小块' }
+                    ]
+                }
+            },
+            {
+                id: 'm2',
+                name: '糖醋排骨',
+                desc: '酸甜可口，老少皆宜',
+                ingredients: {
+                    '肉类': [{ name: '猪小排', amount: '500g' }],
+                    '调料': [
+                        { name: '白糖', amount: '3勺' },
+                        { name: '香醋', amount: '2勺' },
+                        { name: '生抽', amount: '2勺' },
+                        { name: '料酒', amount: '1勺' },
+                        { name: '番茄酱', amount: '2勺' }
+                    ]
+                }
+            },
+            {
+                id: 'm3',
+                name: '可乐鸡翅',
+                desc: '甜香浓郁，孩子最爱',
+                ingredients: {
+                    '肉类': [{ name: '鸡翅中', amount: '10个' }],
+                    '调料': [
+                        { name: '可乐', amount: '1罐' },
+                        { name: '生抽', amount: '2勺' },
+                        { name: '老抽', amount: '1勺' },
+                        { name: '姜片', amount: '3片' },
+                        { name: '料酒', amount: '1勺' }
+                    ]
+                }
+            },
+            {
+                id: 'm4',
+                name: '宫保鸡丁',
+                desc: '麻辣鲜香，经典川菜',
+                ingredients: {
+                    '肉类': [{ name: '鸡胸肉', amount: '300g' }],
+                    '蔬菜': [
+                        { name: '花生米', amount: '50g' },
+                        { name: '干辣椒', amount: '10个' },
+                        { name: '大葱', amount: '1根' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '料酒', amount: '1勺' },
+                        { name: '醋', amount: '1勺' },
+                        { name: '白糖', amount: '1勺' },
+                        { name: '淀粉', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'm5',
+                name: '清蒸鲈鱼',
+                desc: '鲜嫩清淡，营养丰富',
+                ingredients: {
+                    '肉类': [{ name: '鲈鱼', amount: '1条(约500g)' }],
+                    '蔬菜': [
+                        { name: '葱丝', amount: '适量' },
+                        { name: '姜丝', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '蒸鱼豉油', amount: '3勺' },
+                        { name: '料酒', amount: '1勺' },
+                        { name: '食用油', amount: '2勺' }
+                    ]
+                }
+            },
+            {
+                id: 'm6',
+                name: '番茄牛腩',
+                desc: '酸甜开胃，软烂入味',
+                ingredients: {
+                    '肉类': [{ name: '牛腩', amount: '500g' }],
+                    '蔬菜': [
+                        { name: '番茄', amount: '3个' },
+                        { name: '洋葱', amount: '半个' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '料酒', amount: '2勺' },
+                        { name: '番茄酱', amount: '2勺' },
+                        { name: '姜片', amount: '3片' }
+                    ]
+                }
+            },
+            {
+                id: 'm7',
+                name: '蒜蓉粉丝虾',
+                desc: '鲜香美味，宴客佳品',
+                ingredients: {
+                    '肉类': [{ name: '鲜虾', amount: '300g' }],
+                    '蔬菜': [
+                        { name: '粉丝', amount: '1把' },
+                        { name: '蒜蓉', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '料酒', amount: '1勺' },
+                        { name: '食用油', amount: '2勺' },
+                        { name: '葱花', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'm8',
+                name: '麻婆豆腐',
+                desc: '麻辣鲜香，下饭神器',
+                ingredients: {
+                    '肉类': [{ name: '猪肉末', amount: '100g' }],
+                    '蔬菜': [
+                        { name: '嫩豆腐', amount: '1盒' }
+                    ],
+                    '调料': [
+                        { name: '豆瓣酱', amount: '1勺' },
+                        { name: '花椒粉', amount: '适量' },
+                        { name: '生抽', amount: '1勺' },
+                        { name: '淀粉', amount: '适量' },
+                        { name: '蒜末', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'm9',
+                name: '白灼虾',
+                desc: '原汁原味，鲜甜可口',
+                ingredients: {
+                    '肉类': [{ name: '鲜虾', amount: '400g' }],
+                    '蔬菜': [
+                        { name: '姜片', amount: '5片' },
+                        { name: '葱段', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '料酒', amount: '1勺' },
+                        { name: '生抽', amount: '2勺' },
+                        { name: '香醋', amount: '1勺' },
+                        { name: '姜末', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'm10',
+                name: '清蒸鳕鱼',
+                desc: '低脂高蛋白，健康首选',
+                ingredients: {
+                    '肉类': [{ name: '鳕鱼块', amount: '300g' }],
+                    '蔬菜': [
+                        { name: '葱丝', amount: '适量' },
+                        { name: '姜丝', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '蒸鱼豉油', amount: '2勺' },
+                        { name: '料酒', amount: '1勺' },
+                        { name: '食用油', amount: '1勺' }
+                    ]
+                }
+            },
+            {
+                id: 'm11',
+                name: '香菇滑鸡',
+                desc: '嫩滑鲜美，营养丰富',
+                ingredients: {
+                    '肉类': [{ name: '鸡腿肉', amount: '300g' }],
+                    '蔬菜': [
+                        { name: '鲜香菇', amount: '8朵' },
+                        { name: '姜丝', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '料酒', amount: '1勺' },
+                        { name: '蚝油', amount: '1勺' },
+                        { name: '淀粉', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'm12',
+                name: '冬瓜虾仁',
+                desc: '清淡爽口，低卡健康',
+                ingredients: {
+                    '肉类': [{ name: '虾仁', amount: '200g' }],
+                    '蔬菜': [
+                        { name: '冬瓜', amount: '400g' },
+                        { name: '姜丝', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '料酒', amount: '1勺' },
+                        { name: '香油', amount: '少许' }
+                    ]
+                }
+            },
+            {
+                id: 'm13',
+                name: '芦笋炒鸡胸',
+                desc: '健身餐首选，低脂高蛋白',
+                ingredients: {
+                    '肉类': [{ name: '鸡胸肉', amount: '250g' }],
+                    '蔬菜': [
+                        { name: '芦笋', amount: '200g' },
+                        { name: '蒜末', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '1勺' },
+                        { name: '料酒', amount: '1勺' },
+                        { name: '黑胡椒', amount: '适量' },
+                        { name: '橄榄油', amount: '1勺' }
+                    ]
+                }
+            },
+            {
+                id: 'm14',
+                name: '蒸蛋羹',
+                desc: '嫩滑如豆腐，老少皆宜',
+                ingredients: {
+                    '肉类': [{ name: '鸡蛋', amount: '3个' }],
+                    '蔬菜': [
+                        { name: '温水', amount: '200ml' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '1勺' },
+                        { name: '香油', amount: '少许' },
+                        { name: '葱花', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'm15',
+                name: '白切鸡',
+                desc: '皮爽肉嫩，原汁原味',
+                ingredients: {
+                    '肉类': [{ name: '三黄鸡', amount: '半只' }],
+                    '蔬菜': [
+                        { name: '姜片', amount: '5片' },
+                        { name: '葱段', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '料酒', amount: '2勺' },
+                        { name: '生抽', amount: '2勺' },
+                        { name: '姜末', amount: '适量' },
+                        { name: '葱末', amount: '适量' }
+                    ]
+                }
+            }
+        ]
+    },
+    vegetable: {
+        name: '素菜',
+        items: [
+            {
+                id: 'v1',
+                name: '蒜蓉西兰花',
+                desc: '清爽健康，营养丰富',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '西兰花', amount: '1颗' },
+                        { name: '蒜末', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '1勺' },
+                        { name: '蚝油', amount: '1勺' },
+                        { name: '食用油', amount: '2勺' }
+                    ]
+                }
+            },
+            {
+                id: 'v2',
+                name: '干煸豆角',
+                desc: '干香麻辣，下饭好菜',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '四季豆', amount: '400g' },
+                        { name: '干辣椒', amount: '5个' },
+                        { name: '花椒', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '1勺' },
+                        { name: '盐', amount: '适量' },
+                        { name: '蒜末', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'v3',
+                name: '地三鲜',
+                desc: '东北经典，咸香可口',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '土豆', amount: '2个' },
+                        { name: '茄子', amount: '2根' },
+                        { name: '青椒', amount: '2个' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '蚝油', amount: '1勺' },
+                        { name: '淀粉', amount: '适量' },
+                        { name: '蒜末', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'v4',
+                name: '凉拌黄瓜',
+                desc: '清爽解腻，夏日必备',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '黄瓜', amount: '2根' },
+                        { name: '蒜末', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '香醋', amount: '1勺' },
+                        { name: '香油', amount: '1勺' },
+                        { name: '辣椒油', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'v5',
+                name: '番茄炒蛋',
+                desc: '经典家常菜，酸甜可口',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '番茄', amount: '2个' },
+                        { name: '鸡蛋', amount: '3个' }
+                    ],
+                    '调料': [
+                        { name: '白糖', amount: '1勺' },
+                        { name: '盐', amount: '适量' },
+                        { name: '葱花', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'v6',
+                name: '醋溜白菜',
+                desc: '酸辣开胃，简单快手',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '大白菜', amount: '半颗' }
+                    ],
+                    '调料': [
+                        { name: '香醋', amount: '2勺' },
+                        { name: '生抽', amount: '1勺' },
+                        { name: '干辣椒', amount: '3个' },
+                        { name: '蒜末', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'v7',
+                name: '蚝油生菜',
+                desc: '鲜嫩爽口，三分钟搞定',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '生菜', amount: '2颗' },
+                        { name: '蒜末', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '蚝油', amount: '2勺' },
+                        { name: '生抽', amount: '1勺' },
+                        { name: '食用油', amount: '2勺' }
+                    ]
+                }
+            },
+            {
+                id: 'v8',
+                name: '红烧茄子',
+                desc: '软糯入味，比肉还香',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '茄子', amount: '2根' },
+                        { name: '青椒', amount: '1个' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '老抽', amount: '半勺' },
+                        { name: '白糖', amount: '1勺' },
+                        { name: '淀粉', amount: '适量' },
+                        { name: '蒜末', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'v9',
+                name: '白灼菜心',
+                desc: '清脆爽口，原汁原味',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '菜心', amount: '400g' },
+                        { name: '蒜末', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '蚝油', amount: '1勺' },
+                        { name: '食用油', amount: '2勺' }
+                    ]
+                }
+            },
+            {
+                id: 'v10',
+                name: '凉拌木耳',
+                desc: '爽脆开胃，清热解毒',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '干木耳', amount: '30g' },
+                        { name: '黄瓜', amount: '半根' },
+                        { name: '蒜末', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '香醋', amount: '1勺' },
+                        { name: '香油', amount: '1勺' },
+                        { name: '辣椒油', amount: '少许' }
+                    ]
+                }
+            },
+            {
+                id: 'v11',
+                name: '蒸南瓜',
+                desc: '香甜软糯，养胃佳品',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '老南瓜', amount: '500g' }
+                    ],
+                    '调料': [
+                        { name: '蜂蜜', amount: '1勺' },
+                        { name: '枸杞', amount: '少许' }
+                    ]
+                }
+            },
+            {
+                id: 'v12',
+                name: '清炒豆芽',
+                desc: '清脆爽口，低卡健康',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '绿豆芽', amount: '400g' },
+                        { name: '葱段', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '醋', amount: '少许' },
+                        { name: '食用油', amount: '2勺' }
+                    ]
+                }
+            },
+            {
+                id: 'v13',
+                name: '凉拌菠菜',
+                desc: '补铁养血，清爽开胃',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '菠菜', amount: '400g' },
+                        { name: '花生米', amount: '30g' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '香醋', amount: '1勺' },
+                        { name: '蒜末', amount: '适量' },
+                        { name: '香油', amount: '1勺' }
+                    ]
+                }
+            },
+            {
+                id: 'v14',
+                name: '蒸茄子',
+                desc: '清淡健康，原汁原味',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '长茄子', amount: '2根' },
+                        { name: '蒜末', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '香醋', amount: '1勺' },
+                        { name: '香油', amount: '1勺' },
+                        { name: '葱花', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'v15',
+                name: '清炒山药',
+                desc: '健脾养胃，口感爽脆',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '山药', amount: '300g' },
+                        { name: '木耳', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '白醋', amount: '少许' },
+                        { name: '食用油', amount: '2勺' }
+                    ]
+                }
+            },
+            {
+                id: 'v16',
+                name: '凉拌莴笋丝',
+                desc: '清脆爽口，开胃解腻',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '莴笋', amount: '1根' },
+                        { name: '胡萝卜', amount: '半根' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '香油', amount: '1勺' },
+                        { name: '白醋', amount: '少许' }
+                    ]
+                }
+            }
+        ]
+    },
+    staple: {
+        name: '主食',
+        items: [
+            {
+                id: 's1',
+                name: '蛋炒饭',
+                desc: '粒粒分明，香气四溢',
+                ingredients: {
+                    '主食': [{ name: '米饭', amount: '2碗' }],
+                    '蔬菜': [
+                        { name: '鸡蛋', amount: '2个' },
+                        { name: '葱花', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '1勺' },
+                        { name: '盐', amount: '适量' },
+                        { name: '食用油', amount: '2勺' }
+                    ]
+                }
+            },
+            {
+                id: 's2',
+                name: '葱油拌面',
+                desc: '简单美味，葱香浓郁',
+                ingredients: {
+                    '主食': [{ name: '面条', amount: '200g' }],
+                    '蔬菜': [{ name: '小葱', amount: '1把' }],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '老抽', amount: '半勺' },
+                        { name: '白糖', amount: '1勺' },
+                        { name: '食用油', amount: '3勺' }
+                    ]
+                }
+            },
+            {
+                id: 's3',
+                name: '饺子',
+                desc: '皮薄馅大，鲜美多汁',
+                ingredients: {
+                    '主食': [{ name: '饺子皮', amount: '300g' }],
+                    '肉类': [{ name: '猪肉馅', amount: '300g' }],
+                    '蔬菜': [
+                        { name: '白菜', amount: '200g' },
+                        { name: '葱姜', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '香油', amount: '1勺' },
+                        { name: '盐', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 's4',
+                name: '炒米粉',
+                desc: 'Q弹爽滑，配料丰富',
+                ingredients: {
+                    '主食': [{ name: '米粉', amount: '200g' }],
+                    '蔬菜': [
+                        { name: '鸡蛋', amount: '1个' },
+                        { name: '豆芽', amount: '100g' },
+                        { name: '青菜', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '生抽', amount: '2勺' },
+                        { name: '蚝油', amount: '1勺' },
+                        { name: '食用油', amount: '2勺' }
+                    ]
+                }
+            },
+            {
+                id: 's5',
+                name: '煎饼果子',
+                desc: '早餐首选，香脆可口',
+                ingredients: {
+                    '主食': [
+                        { name: '面粉', amount: '100g' },
+                        { name: '鸡蛋', amount: '1个' }
+                    ],
+                    '蔬菜': [
+                        { name: '生菜', amount: '2片' },
+                        { name: '葱花', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '甜面酱', amount: '1勺' },
+                        { name: '食用油', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 's6',
+                name: '南瓜粥',
+                desc: '香甜软糯，养胃佳品',
+                ingredients: {
+                    '主食': [
+                        { name: '大米', amount: '100g' },
+                        { name: '南瓜', amount: '300g' }
+                    ],
+                    '调料': [
+                        { name: '冰糖', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 's7',
+                name: '白米饭',
+                desc: '粒粒分明，百搭主食',
+                ingredients: {
+                    '主食': [{ name: '大米', amount: '300g' }],
+                    '调料': [
+                        { name: '水', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 's8',
+                name: '馒头',
+                desc: '松软可口，北方经典',
+                ingredients: {
+                    '主食': [{ name: '中筋面粉', amount: '300g' }],
+                    '调料': [
+                        { name: '酵母', amount: '3g' },
+                        { name: '白糖', amount: '10g' },
+                        { name: '温水', amount: '150ml' }
+                    ]
+                }
+            }
+        ]
+    },
+    soup: {
+        name: '汤羹',
+        items: [
+            {
+                id: 'p1',
+                name: '紫菜蛋花汤',
+                desc: '简单快手，鲜美清淡',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '紫菜', amount: '1张' },
+                        { name: '鸡蛋', amount: '1个' },
+                        { name: '葱花', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '香油', amount: '少许' }
+                    ]
+                }
+            },
+            {
+                id: 'p2',
+                name: '冬瓜排骨汤',
+                desc: '清热解暑，营养丰富',
+                ingredients: {
+                    '肉类': [{ name: '排骨', amount: '300g' }],
+                    '蔬菜': [
+                        { name: '冬瓜', amount: '500g' },
+                        { name: '姜片', amount: '3片' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '料酒', amount: '1勺' }
+                    ]
+                }
+            },
+            {
+                id: 'p3',
+                name: '番茄蛋汤',
+                desc: '酸甜开胃，家常美味',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '番茄', amount: '2个' },
+                        { name: '鸡蛋', amount: '2个' },
+                        { name: '葱花', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '香油', amount: '少许' }
+                    ]
+                }
+            },
+            {
+                id: 'p4',
+                name: '玉米排骨汤',
+                desc: '鲜甜可口，老少皆宜',
+                ingredients: {
+                    '肉类': [{ name: '排骨', amount: '300g' }],
+                    '蔬菜': [
+                        { name: '玉米', amount: '1根' },
+                        { name: '胡萝卜', amount: '1根' },
+                        { name: '姜片', amount: '3片' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '料酒', amount: '1勺' }
+                    ]
+                }
+            },
+            {
+                id: 'p5',
+                name: '酸辣汤',
+                desc: '酸辣开胃，暖胃驱寒',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '豆腐', amount: '半盒' },
+                        { name: '木耳', amount: '适量' },
+                        { name: '香菇', amount: '3朵' },
+                        { name: '鸡蛋', amount: '1个' }
+                    ],
+                    '调料': [
+                        { name: '香醋', amount: '2勺' },
+                        { name: '白胡椒粉', amount: '适量' },
+                        { name: '生抽', amount: '1勺' },
+                        { name: '淀粉', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'p6',
+                name: '银耳莲子汤',
+                desc: '滋补养颜，甜润可口',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '银耳', amount: '1朵' },
+                        { name: '莲子', amount: '30g' },
+                        { name: '红枣', amount: '5颗' }
+                    ],
+                    '调料': [
+                        { name: '冰糖', amount: '适量' }
+                    ]
+                }
+            },
+            {
+                id: 'p7',
+                name: '萝卜丝虾皮汤',
+                desc: '清淡鲜美，补钙佳品',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '白萝卜', amount: '半根' },
+                        { name: '虾皮', amount: '20g' },
+                        { name: '葱花', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '香油', amount: '少许' },
+                        { name: '白胡椒粉', amount: '少许' }
+                    ]
+                }
+            },
+            {
+                id: 'p8',
+                name: '海带豆腐汤',
+                desc: '清淡营养，降脂降压',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '嫩豆腐', amount: '1盒' },
+                        { name: '海带结', amount: '100g' },
+                        { name: '葱花', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '香油', amount: '少许' }
+                    ]
+                }
+            },
+            {
+                id: 'p9',
+                name: '青菜豆腐汤',
+                desc: '清淡养胃，简单易做',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '嫩豆腐', amount: '半盒' },
+                        { name: '小白菜', amount: '200g' },
+                        { name: '姜丝', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '香油', amount: '少许' }
+                    ]
+                }
+            },
+            {
+                id: 'p10',
+                name: '莲藕排骨汤',
+                desc: '清甜滋润，健脾开胃',
+                ingredients: {
+                    '肉类': [{ name: '排骨', amount: '300g' }],
+                    '蔬菜': [
+                        { name: '莲藕', amount: '300g' },
+                        { name: '姜片', amount: '3片' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '料酒', amount: '1勺' }
+                    ]
+                }
+            },
+            {
+                id: 'p11',
+                name: '丝瓜蛋汤',
+                desc: '清淡解暑，美容养颜',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '丝瓜', amount: '1根' },
+                        { name: '鸡蛋', amount: '1个' },
+                        { name: '葱花', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '香油', amount: '少许' }
+                    ]
+                }
+            },
+            {
+                id: 'p12',
+                name: '山药排骨汤',
+                desc: '滋补养生，健脾养胃',
+                ingredients: {
+                    '肉类': [{ name: '排骨', amount: '300g' }],
+                    '蔬菜': [
+                        { name: '山药', amount: '300g' },
+                        { name: '枸杞', amount: '少许' },
+                        { name: '姜片', amount: '3片' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '料酒', amount: '1勺' }
+                    ]
+                }
+            },
+            {
+                id: 'p13',
+                name: '菠菜蛋花汤',
+                desc: '补铁养血，清淡可口',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '菠菜', amount: '200g' },
+                        { name: '鸡蛋', amount: '1个' },
+                        { name: '葱花', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '香油', amount: '少许' }
+                    ]
+                }
+            },
+            {
+                id: 'p14',
+                name: '黄瓜蛋汤',
+                desc: '清爽解暑，低卡健康',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '黄瓜', amount: '1根' },
+                        { name: '鸡蛋', amount: '1个' },
+                        { name: '葱花', amount: '适量' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '香油', amount: '少许' }
+                    ]
+                }
+            },
+            {
+                id: 'p15',
+                name: '菌菇豆腐汤',
+                desc: '鲜美清淡，增强免疫',
+                ingredients: {
+                    '蔬菜': [
+                        { name: '嫩豆腐', amount: '半盒' },
+                        { name: '金针菇', amount: '100g' },
+                        { name: '香菇', amount: '3朵' }
+                    ],
+                    '调料': [
+                        { name: '盐', amount: '适量' },
+                        { name: '香油', amount: '少许' },
+                        { name: '葱花', amount: '适量' }
+                    ]
+                }
+            }
+        ]
+    }
+};
+
+// 购物车数据
+let cart = [];
+
+// DOM 元素
+const homePage = document.getElementById('homePage');
+const menuPage = document.getElementById('menuPage');
+const ingredientPage = document.getElementById('ingredientPage');
+const categoryCards = document.querySelectorAll('.category-card');
+const backBtn = document.getElementById('backBtn');
+const backHomeBtn = document.getElementById('backHomeBtn');
+const categoryTitle = document.getElementById('categoryTitle');
+const dishList = document.getElementById('dishList');
+const cartFloat = document.getElementById('cartFloat');
+const cartModal = document.getElementById('cartModal');
+const closeCart = document.getElementById('closeCart');
+const cartCount = document.getElementById('cartCount');
+const cartList = document.getElementById('cartList');
+const confirmBtn = document.getElementById('confirmBtn');
+const selectedDishes = document.getElementById('selectedDishes');
+const exportBtn = document.getElementById('exportBtn');
+const exportDate = document.getElementById('exportDate');
+const ingredientContent = document.getElementById('ingredientContent');
+
+// 初始化
+document.addEventListener('DOMContentLoaded', () => {
+    bindEvents();
+    updateCartCount();
+});
+
+// 绑定事件
+function bindEvents() {
+    // 分类卡片点击
+    categoryCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const category = card.dataset.category;
+            showMenuPage(category);
+        });
+    });
+
+    // 返回按钮
+    backBtn.addEventListener('click', showHomePage);
+    backHomeBtn.addEventListener('click', showHomePage);
+
+    // 购物车
+    cartFloat.addEventListener('click', showCartModal);
+    closeCart.addEventListener('click', hideCartModal);
+    cartModal.addEventListener('click', (e) => {
+        if (e.target === cartModal) hideCartModal();
+    });
+
+    // 确认生成清单
+    confirmBtn.addEventListener('click', showIngredientPage);
+
+    // 导出按钮
+    exportBtn.addEventListener('click', exportToImage);
+}
+
+// 显示首页
+function showHomePage() {
+    homePage.classList.remove('hidden');
+    menuPage.classList.add('hidden');
+    ingredientPage.classList.add('hidden');
+}
+
+// 显示菜单页
+function showMenuPage(category) {
+    const data = dishesData[category];
+    categoryTitle.textContent = data.name;
+
+    // 生成菜品列表
+    dishList.innerHTML = data.items.map(item => `
+        <div class="dish-item">
+            <div class="dish-info">
+                <h4>${item.name}</h4>
+                <p>${item.desc}</p>
+            </div>
+            <button class="add-btn" data-id="${item.id}" data-category="${category}">+</button>
+        </div>
+    `).join('');
+
+    // 绑定添加按钮事件
+    dishList.querySelectorAll('.add-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const cat = btn.dataset.category;
+            addToCart(id, cat);
+
+            // 添加动画效果
+            btn.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                btn.style.transform = 'scale(1)';
+            }, 150);
+        });
+    });
+
+    homePage.classList.add('hidden');
+    menuPage.classList.remove('hidden');
+    ingredientPage.classList.add('hidden');
+}
+
+// 添加到购物车
+function addToCart(id, category) {
+    const dish = dishesData[category].items.find(item => item.id === id);
+    const existingItem = cart.find(item => item.id === id);
+
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({
+            id: id,
+            name: dish.name,
+            category: dishesData[category].name,
+            ingredients: dish.ingredients,
+            quantity: 1
+        });
+    }
+
+    updateCartCount();
+    showAddAnimation();
+}
+
+// 从购物车移除
+function removeFromCart(id) {
+    cart = cart.filter(item => item.id !== id);
+    updateCartCount();
+    renderCartList();
+}
+
+// 更新购物车数量
+function updateCartCount() {
+    const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+    cartCount.textContent = total;
+
+    if (total === 0) {
+        cartFloat.style.transform = 'scale(0)';
+        setTimeout(() => {
+            cartFloat.style.transform = 'scale(1)';
+        }, 100);
+    }
+}
+
+// 显示添加动画
+function showAddAnimation() {
+    cartFloat.style.transform = 'scale(1.2)';
+    setTimeout(() => {
+        cartFloat.style.transform = 'scale(1)';
+    }, 200);
+}
+
+// 显示购物车弹窗
+function showCartModal() {
+    if (cart.length === 0) {
+        alert('购物车是空的，请先选择菜品！');
+        return;
+    }
+    renderCartList();
+    cartModal.classList.remove('hidden');
+}
+
+// 隐藏购物车弹窗
+function hideCartModal() {
+    cartModal.classList.add('hidden');
+}
+
+// 渲染购物车列表
+function renderCartList() {
+    if (cart.length === 0) {
+        cartList.innerHTML = `
+            <div class="empty-cart">
+                <div class="empty-cart-icon">🛒</div>
+                <p>购物车是空的</p>
+            </div>
+        `;
+        return;
+    }
+
+    cartList.innerHTML = cart.map(item => `
+        <div class="cart-item">
+            <div class="cart-item-info">
+                <h4>${item.name}</h4>
+                <span>${item.category}</span>
+            </div>
+            <button class="remove-btn" data-id="${item.id}">×</button>
+        </div>
+    `).join('');
+
+    // 绑定删除按钮
+    cartList.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            removeFromCart(id);
+        });
+    });
+}
+
+// 显示原料清单页
+function showIngredientPage() {
+    hideCartModal();
+
+    // 设置当前日期
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+    exportDate.textContent = dateStr;
+
+    // 按菜品分组渲染食材
+    const dishCards = cart.map(item => {
+        const ingredientRows = Object.entries(item.ingredients).map(([category, ingredients]) => {
+            return ingredients.map(ing => `
+                <div class="ingredient-item">
+                    <span class="ingredient-name">${ing.name}</span>
+                    <span class="ingredient-amount">${ing.amount}</span>
+                </div>
+            `).join('');
+        }).join('');
+
+        return `
+            <div class="dish-ingredient-card">
+                <div class="dish-ingredient-header">
+                    <span class="dish-ingredient-name">${item.name}</span>
+                    <span class="dish-ingredient-category">${item.category}</span>
+                </div>
+                <div class="dish-ingredient-body">
+                    ${ingredientRows}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    selectedDishes.innerHTML = `
+        <h3>已选菜品（${cart.length}道）</h3>
+        <div class="dish-ingredient-cards">
+            ${dishCards}
+        </div>
+    `;
+
+    homePage.classList.add('hidden');
+    menuPage.classList.add('hidden');
+    ingredientPage.classList.remove('hidden');
+}
+
+// 导出为图片
+function exportToImage() {
+    if (typeof html2canvas === 'undefined') {
+        alert('图片导出库加载中，请稍后再试');
+        return;
+    }
+
+    // 显示加载提示
+    const originalText = exportBtn.innerHTML;
+    exportBtn.innerHTML = '<span class="export-icon">⏳</span> 生成中...';
+    exportBtn.disabled = true;
+
+    // 创建临时容器用于截图
+    const tempContainer = document.createElement('div');
+    tempContainer.style.cssText = `
+        position: fixed;
+        left: -9999px;
+        top: 0;
+        width: 480px;
+        background: linear-gradient(135deg, #fff8f0 0%, #ffffff 100%);
+        padding: 20px;
+        box-sizing: border-box;
+    `;
+
+    // 添加标题
+    const titleDiv = document.createElement('div');
+    titleDiv.style.cssText = `
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 20px;
+        background: linear-gradient(135deg, #ff8c00 0%, #ff6b35 100%);
+        border-radius: 16px;
+        color: white;
+    `;
+    titleDiv.innerHTML = `
+        <h1 style="margin: 0; font-size: 24px; font-weight: 600;">🍽️ 家庭点菜助手</h1>
+        <p style="margin: 8px 0 0 0; opacity: 0.9;">采购清单</p>
+    `;
+    tempContainer.appendChild(titleDiv);
+
+    // 克隆内容区域
+    const contentClone = ingredientContent.cloneNode(true);
+    contentClone.style.cssText = `
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    `;
+    tempContainer.appendChild(contentClone);
+
+    // 添加底部信息
+    const footerDiv = document.createElement('div');
+    footerDiv.style.cssText = `
+        text-align: center;
+        margin-top: 20px;
+        padding: 15px;
+        color: #999;
+        font-size: 12px;
+    `;
+    footerDiv.innerHTML = 'Generated by 家庭点菜助手';
+    tempContainer.appendChild(footerDiv);
+
+    document.body.appendChild(tempContainer);
+
+    // 使用 html2canvas 生成图片
+    html2canvas(tempContainer, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        logging: false
+    }).then(canvas => {
+        // 移除临时容器
+        document.body.removeChild(tempContainer);
+
+        // 生成文件名
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+        const fileName = `采购清单_${dateStr}.png`;
+
+        // 下载图片
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        // 恢复按钮状态
+        exportBtn.innerHTML = originalText;
+        exportBtn.disabled = false;
+
+        // 显示成功提示
+        showExportSuccess();
+    }).catch(err => {
+        console.error('导出失败:', err);
+        document.body.removeChild(tempContainer);
+        exportBtn.innerHTML = originalText;
+        exportBtn.disabled = false;
+        alert('导出失败，请重试');
+    });
+}
+
+// 显示导出成功提示
+function showExportSuccess() {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 20px 40px;
+        border-radius: 12px;
+        font-size: 16px;
+        z-index: 1000;
+        animation: fadeInOut 2s ease;
+    `;
+    toast.innerHTML = '✅ 图片已导出成功！';
+
+    // 添加动画样式
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+    `;
+    document.head.appendChild(style);
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        document.body.removeChild(toast);
+        document.head.removeChild(style);
+    }, 2000);
+}
+    </script>
+</body>
+</html>
